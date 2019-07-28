@@ -1,0 +1,73 @@
+---
+
+version: "3"
+
+networks:
+  git:
+    driver: bridge
+    
+volumes:
+  gitea_data:
+  mysql_data:
+  nginx_data:
+    
+services:
+  server:
+    image: gitea/gitea:latest
+    container_name: gitea
+    hostname: Gitea
+    restart: always
+    volumes:
+      - gitea_data:/data
+    networks:
+      - git
+    ports:
+      - "2222:22"
+    expose:
+      - 3000
+    depends_on:
+      - database
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - DB_TYPE=mysql
+      - DB_HOST=database:3306
+      - DB_NAME=gitea
+      - DB_USER=gitea
+      - DB_PASSWD=gitea
+      
+  database:
+    image: mysql:5.7
+    container_name: mysql
+    hostname: MySQL
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - git
+    expose:
+      - 3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=gitea
+      - MYSQL_USER=gitea
+      - MYSQL_PASSWORD=gitea
+      - MYSQL_DATABASE=gitea
+
+  proxy:
+    build: ./nginx
+    image: "nginx:certbot"
+    container_name: nginx
+    hostname: nginx
+    restart: always
+    volumes:
+      - nginx_data:/etc/nginx
+    networks:
+      - git
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - server
+    environment:
+      - DOMAIN_NAME=git.roozbeh.cloud
+      - EMAIL_ADDRESS=me@roozbeh.cloud
