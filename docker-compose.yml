@@ -69,5 +69,5 @@ services:
     depends_on:
       - server
     environment:
-      - DOMAIN_NAME=git.roozbeh.cloud
-      - EMAIL_ADDRESS=me@roozbeh.cloud
+      - DOMAIN_NAME=domain.tld
+      - EMAIL_ADDRESS=email@domain.tld
